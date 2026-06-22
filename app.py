@@ -89,4 +89,4 @@ st.sidebar.markdown("실제 제주시청 인근 데이터를 활용합니다.")
 
 # 사이드바 컨트롤
 num_kickboards = st.sidebar.slider("수거할 구역 수 (Scale)", min_value=3, max_value=15, value=8)
-algo_mode = st.sidebar.selectbox("연산 알고리즘", ["탐욕 알고리즘 (Greedy TSP)", "완전 탐
+algo_mode = st.sidebar.selectbox("연산 알고리즘", ["탐욕 알고리즘 (Greedy TSP)", "완전 탐색 (Brute Force)"])
