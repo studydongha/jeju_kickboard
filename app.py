@@ -102,7 +102,7 @@ st.title("🌐 제주 스마트시티: AI 실제 도로망 라우팅 시스템")
 st.markdown("건물을 뚫고 가는 단순 직선(Haversine) 경로의 한계를 극복하기 위해, **OSRM(Open Source Routing Machine) API**를 연동하여 실제 차량이 이동 가능한 도로망(Navigation Route) 기반 최적 동선을 생성합니다.")
 
 if 'live_data' not in st.session_state or refresh_btn:
-    with st.spinner('구역 내 킥보드 데이터 수집 및 실제 도로망 경로를 연산 중입니다...'):
+    with st.spinner('구역 내 전기자전거 데이터 수집 및 실제 도로망 경로를 연산 중입니다...'):
         # 1. 킥보드 데이터 수집
         st.session_state.live_data = fetch_live_kickboards(JEJU_CITY_HALL["lat"], JEJU_CITY_HALL["lng"], search_radius, kickboard_count)
         
@@ -117,7 +117,7 @@ if 'live_data' not in st.session_state or refresh_btn:
 # 지표 출력
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("탐색 반경", f"{search_radius} m")
-col2.metric("수신된 킥보드", f"{len(st.session_state.live_data)} 대")
+col2.metric("수신된 전기자전거", f"{len(st.session_state.live_data)} 대")
 if st.session_state.total_dist:
     col3.metric("실제 도로 주행 거리", f"{st.session_state.total_dist/1000:.2f} km")
 col4.metric("AI + OSRM 연산 속도", f"{st.session_state.calc_time:.2f} ms")
