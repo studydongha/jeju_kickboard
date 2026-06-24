@@ -40,18 +40,65 @@ def fetch_live_kickboards(center_lat, center_lng, radius_m, count):
 # ==========================================
 # 3. 최적 경로 탐색 (Greedy TSP)
 # ==========================================
+# ==========================================
+# 3. [심화] 최적 경로 탐색 (DFS 백트래킹 & Greedy 하이브리드)
+# ==========================================
 def calculate_optimal_route(depot, kickboards):
-    unvisited = kickboards.copy()
-    current = depot
-    path = []
+    """
+    킥보드 대수가 적을 때(10대 이하)는 DFS(백트래킹)로 100% 완벽한 최적 경로를 찾고,
+    연산량이 폭발할 위험이 있을 때는 탐욕 알고리즘(Greedy)으로 자동 전환합니다.
+    """
     
-    while unvisited:
-        nearest = min(unvisited, key=lambda k: haversine(current['lat'], current['lng'], k['lat'], k['lng']))
-        path.append(nearest)
-        current = nearest
-        unvisited.remove(nearest)
+    # 1. 안전장치: 킥보드가 11대 이상이면 탐욕 알고리즘 작동 (서버 다운 방지)
+    if len(kickboards) > 10:
+        unvisited = kickboards.copy()
+        current = depot
+        path = []
+        while unvisited:
+            nearest = min(unvisited, key=lambda k: haversine(current['lat'], current['lng'], k['lat'], k['lng']))
+            path.append(nearest)
+            current = nearest
+            unvisited.remove(nearest)
+        return path
+
+    # 2. 10대 이하라면: DFS 기반 백트래킹 (Branch and Bound) 작동
+    best_path = []
+    min_distance = float('inf') # 최솟값을 저장할 변수 (처음엔 무한대로 설정)
+    
+    def dfs(current_node, unvisited, current_path, current_dist):
+        nonlocal best_path, min_distance
         
-    return path
+        # [핵심] 가지치기 (Pruning): 
+        # 탐색 중인데 이미 지금까지 찾은 최단 거리(min_distance)보다 길어졌다면?
+        # 볼 필요도 없으니 즉시 탐색 중단! (연산 속도를 수십 배 끌어올림)
+        if current_dist >= min_distance:
+            return
+            
+        # 모든 킥보드를 다 방문했을 때
+        if not unvisited:
+            if current_dist < min_distance:
+                min_distance = current_dist
+                best_path = current_path[:] # 최고 효율 경로 업데이트
+            return
+            
+        # 아직 방문 안 한 킥보드들을 하나씩 다 가봄 (DFS)
+        for i, next_node in enumerate(unvisited):
+            dist = haversine(current_node['lat'], current_node['lng'], next_node['lat'], next_node['lng'])
+            
+            next_unvisited = unvisited[:i] + unvisited[i+1:]
+            current_path.append(next_node)
+            
+            # 다음 킥보드로 이동 (재귀 호출)
+            dfs(next_node, next_unvisited, current_path, current_dist + dist)
+            
+            # 백트래킹: 방금 가본 경로를 취소하고 다른 길을 찾아봄
+            current_path.pop()
+
+    # DFS 탐색 시작
+    dfs(depot, kickboards, [], 0)
+    
+    return best_path
+
 
 # ==========================================
 # 4. [심화] OSRM 실제 도로망 API 호출
