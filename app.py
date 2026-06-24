@@ -50,7 +50,7 @@ def calculate_optimal_route(depot, kickboards):
     """
     
     # 1. 안전장치: 킥보드가 11대 이상이면 탐욕 알고리즘 작동 (서버 다운 방지)
-    if len(kickboards) > 13:
+    if len(kickboards) > 11:
         unvisited = kickboards.copy()
         current = depot
         path = []
